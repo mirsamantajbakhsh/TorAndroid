@@ -1,0 +1,39 @@
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'ir.mstajbakhsh.torandroid'
+
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                groupId 'ir.mstajbakhsh.torandroid'
+                artifactId 'Android'
+                name 'TorAndroid'
+                description 'Tor Android Library'
+                url 'https://github.com/mirsamantajbakhsh/TorAndroid'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'mirsamantajbakhsh'
+                        name 'Mir Saman Tajbakhsh'
+                        email 'saman@mstajbakhsh.ir'
+                    }
+                }
+
+                scm {
+                    connection 'https://github.com/mirsamantajbakhsh/TorAndroid.git'
+                    developerConnection 'https://github.com/mirsamantajbakhsh/TorAndroid.git'
+                    url 'https://mstajbakhsh.ir'
+                }
+            }
+        }
+    }
+}
