@@ -12,6 +12,19 @@ It is very simple. Just implement the following package in your application Grad
 
 ```shell
 implementation 'ir.mstajbakhsh:tor-android:1.0.0'
+
+# Or Use JitPack
+
+allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+
+dependencies {
+	        implementation 'com.github.mirsamantajbakhsh:TorAndroid:1.0.0'
+	}
 ```
 
 ## Code Example
