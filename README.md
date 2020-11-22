@@ -11,7 +11,7 @@ Tor Android is a library which included Tor binary inside it. Tor Binary is grab
 It is very simple. Just implement the following package in your application Gradle file:
 
 ```shell
-implementation 'ir.mstajbakhsh.android:TorAndroid:1.0.0'
+implementation 'ir.mstajbakhsh:tor-android:1.0.0'
 ```
 
 ## Code Example
