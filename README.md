@@ -1,3 +1,5 @@
+![Credits from: https://android.gadgethacks.com/how-to/tor-for-android-stay-anonymous-your-phone-0163360/](Extras/TorAndroid.jpg)
+
 # Tor Android
 
 Yet Another Tor Library for Android
@@ -41,6 +43,10 @@ The main configuration of the Tor Android is based on ```TorBuilder``` class. He
             e.printStackTrace();
         }
 ```
+
+In action version:
+
+![SampleCode](Extras/SampleCode.png)
 
 # Donate
 
