@@ -26,7 +26,7 @@ dependencies {
     embed(name: 'tor-android-binary-0.4.4.0', ext: 'aar')
     embed 'org.slf4j:slf4j-api:1.7.24'
     embed 'org.slf4j:slf4j-simple:1.7.24'
-    embed group: 'org.zeroturnaround', name: 'zt-exec', version: '1.11'
+    embed group: 'org.zeroturnaround', name: 'zt-exec', version: '1.12'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
