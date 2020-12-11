@@ -184,26 +184,48 @@ public class TorProxy {
 
     public boolean start(final IConnectionDone connectionDone) throws IOException {
         File appCacheHome = cntx.getDir(SampleTorServiceConstants.DIRECTORY_TOR_DATA, Application.MODE_PRIVATE);
-        File HiddenServiceDir = null;
 
         Vector<String> command = new Vector<>();
         command.add("DataDirectory " + appCacheHome.getCanonicalPath());
         command.add("SocksPort " + SOCKS_PORT);
 
-        if (this.internalHiddenServicePort != -1 && this.externalHiddenServicePort != -1) {
-            HiddenServiceDir = cntx.getDir("HiddenService", Context.MODE_PRIVATE);
-            command.add("HiddenServiceDir " + HiddenServiceDir.getCanonicalPath());
-            command.add("HiddenServicePort " + externalHiddenServicePort + " 127.0.0.1:" + internalHiddenServicePort);
+        for (HiddenService hs : services) {
+            if (hs.getHiddenServiceDir().equalsIgnoreCase("")) { //Create HSDir if not created!
+                File newHSDir;
 
-            //Folder is too permissive
-            try {
-                new ProcessExecutor("chmod", "700", HiddenServiceDir.getCanonicalPath()).execute();
-            } catch (InterruptedException | TimeoutException e) {
-                if (debuggable) {
-                    Log.e("MSTTOR", e.getMessage());
+                int availableHSFolderNumber = 1;
+                while (true) {
+                    newHSDir = new File(HSDir.getAbsolutePath() + File.separator + "HS" + availableHSFolderNumber);
+                    if (!newHSDir.exists()) {
+                        newHSDir.mkdirs();
+                        break;
+                    }
+                    availableHSFolderNumber++;
                 }
+
+                hs.setHiddenServiceDir(newHSDir.getAbsolutePath());
+            }
+
+            command.add(hs.toString());
+        }
+
+
+        //Folder is too permissive
+        try {
+            //Make the main folder 700
+            new ProcessExecutor("chmod", "700", HSDir.getCanonicalPath()).execute();
+
+            //Make each HS folder 700
+            for (HiddenService hsDir : services) {
+                new ProcessExecutor("chmod", "700", hsDir.getHiddenServiceDir()).execute();
+            }
+
+        } catch (InterruptedException | TimeoutException e) {
+            if (debuggable) {
+                Log.e("MSTTOR", e.getMessage());
             }
         }
+
 
         if (!fileTorRc.exists()) {
             ts = TorStatus.TORRC_NOT_FOUND;
@@ -212,6 +234,7 @@ public class TorProxy {
 
         //Start Tor
         ps = new ProcessExecutor();
+
         File torrc = createTorrc(command);
         try {
             ps.command(fileTorBin.getCanonicalPath(), "-f", torrc.getCanonicalPath())
@@ -231,7 +254,8 @@ public class TorProxy {
                         }
                     })
                     .execute();
-        } catch (InterruptedException | TimeoutException e) {
+        } catch (InterruptedException |
+                TimeoutException e) {
             if (debuggable) {
                 Log.e("MSTTOR", e.getMessage());
             }
