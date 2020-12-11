@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.TimeoutException;
 
@@ -24,6 +26,8 @@ public class TorProxy {
     private File fileTorRc = null;
     private ProcessExecutor ps;
     private boolean debuggable = false;
+    private File HSDir = null;
+    private File TorrcDir = null;
 
     public enum TorStatus {NOT_INIT, OK, CONNECTING, DIED, FAILED_INSTLLATION, INSTALLED, TORRC_NOT_FOUND}
 
@@ -31,16 +35,44 @@ public class TorProxy {
     private int externalHiddenServicePort = -1;
     private int internalHiddenServicePort = -1;
     private boolean useBrideges = false;
+    private TorBuilder builder;
+    private List<HiddenService> services = null;
 
-    public TorProxy(TorBuilder builder) {
-        this.cntx = builder.cntx;
+    private TorProxy(Context context, TorBuilder tb) {
+        this.builder = tb;
+        this.cntx = context;
+
+        if (builder != null) {
+            HSDir = cntx.getDir("HiddenService", Context.MODE_PRIVATE);
+            TorrcDir = cntx.getDir("torconfig", Context.MODE_PRIVATE);
+            torResourceInstaller = new TorResourceInstaller(getContext(), getContext().getFilesDir());
+            ts = TorStatus.NOT_INIT;
+
+            //Clear previous configs
+            clearEverything();
+
+            this.SOCKS_PORT = builder.SOCKS_PORT;
+            this.services = builder.getServices();
+            this.useBrideges = builder.useBrideges;
+            this.debuggable = builder.debuggable;
+        }
+    }
+
+    /**
+     * ُ This constructor will try to load existed torrc file
+     */
+    public TorProxy(Context context, File torrc) {
+        this.cntx = context;
+        HSDir = cntx.getDir("HiddenService", Context.MODE_PRIVATE);
+        TorrcDir = cntx.getDir("torconfig", Context.MODE_PRIVATE);
         torResourceInstaller = new TorResourceInstaller(getContext(), getContext().getFilesDir());
         ts = TorStatus.NOT_INIT;
+        builder = TorUtils.parseTorrc(torrc);
+
 
         if (builder != null) {
             this.SOCKS_PORT = builder.SOCKS_PORT;
-            this.externalHiddenServicePort = builder.externalHiddenServicePort;
-            this.internalHiddenServicePort = builder.internalHiddenServicePort;
+            this.services = builder.getServices();
             this.useBrideges = builder.useBrideges;
             this.debuggable = builder.debuggable;
         }
@@ -107,6 +139,49 @@ public class TorProxy {
 
     }
 
+    /**
+     * This method will remove any preconfigured hidden services! Use with caution, this can not be undo!
+     *
+     * @param cntx Context instance to get the local private storage directory of the application.
+     * @return True if all the hidden services are deleted successfully, False otherwise.
+     */
+    public static boolean removeAllHiddenServices(Context cntx) {
+        File HiddenServiceDir = cntx.getDir("HiddenService", Context.MODE_PRIVATE);
+        try {
+            new ProcessExecutor().command("rm", "-rf", HiddenServiceDir.getAbsolutePath()).execute();
+            return true;
+        } catch (Exception e) {
+            Log.e("MSTTOR", "Error in removing hidden services!\r\n" + e.getMessage());
+            return false;
+        }
+    }
+
+    private File createTorrc(Vector<String> options) {
+        try {
+
+            File torrcDir = cntx.getDir("torconfig", Context.MODE_PRIVATE);
+            File fileWithinMyDir = new File(torrcDir, "torrc");
+            FileOutputStream out = new FileOutputStream(fileWithinMyDir);
+            for (String line : options) {
+                out.write((line + "\r\n").getBytes());
+            }
+            out.flush();
+            out.close();
+
+            return fileWithinMyDir;
+        } catch (IOException ex) {
+            if (debuggable) {
+                Log.e("MSTTOR", ex.getMessage());
+            }
+            return null;
+        }
+    }
+
+
+    public TorStatus getStatus() {
+        return ts;
+    }
+
     public boolean start(final IConnectionDone connectionDone) throws IOException {
         File appCacheHome = cntx.getDir(SampleTorServiceConstants.DIRECTORY_TOR_DATA, Application.MODE_PRIVATE);
         File HiddenServiceDir = null;
@@ -122,7 +197,7 @@ public class TorProxy {
 
             //Folder is too permissive
             try {
-                new ProcessExecutor("chmod" , "700", HiddenServiceDir.getCanonicalPath()).execute();
+                new ProcessExecutor("chmod", "700", HiddenServiceDir.getCanonicalPath()).execute();
             } catch (InterruptedException | TimeoutException e) {
                 if (debuggable) {
                     Log.e("MSTTOR", e.getMessage());
@@ -164,44 +239,26 @@ public class TorProxy {
         return true;
     }
 
-    private File createTorrc(Vector<String> options) {
+    private void clearEverything() {
         try {
+            removeAllHiddenServices(cntx);
+            new ProcessExecutor("rm", "-rf", TorrcDir.getCanonicalPath()).execute();
 
-            File torrcDir = cntx.getDir("torconfig", Context.MODE_PRIVATE);
-            File fileWithinMyDir = new File(torrcDir, "torrc");
-            FileOutputStream out = new FileOutputStream(fileWithinMyDir);
-            for (String line : options) {
-                out.write((line + "\r\n").getBytes());
-            }
-            out.flush();
-            out.close();
-
-            return fileWithinMyDir;
-        } catch (IOException ex) {
+        } catch (InterruptedException | TimeoutException | IOException e) {
             if (debuggable) {
-                Log.e("MSTTOR", ex.getMessage());
+                Log.e("MSTTOR", e.getMessage());
             }
-            return null;
         }
     }
 
-
-    public TorStatus getStatus() {
-        return ts;
-    }
-
     public static class TorBuilder {
-        // optional parameters
         private int SOCKS_PORT = -1;
-        private int externalHiddenServicePort = -1;
-        private int internalHiddenServicePort = -1;
+        List<HiddenService> services = new ArrayList<>();
         private String extraLines = "";
         private boolean useBrideges = false;
-        private Context cntx;
         private boolean debuggable = false;
 
-        public TorBuilder(Context cntx) {
-            this.cntx = cntx;
+        public TorBuilder() {
         }
 
         public TorBuilder setSOCKsPort(int SOCKS_PORT) {
@@ -209,14 +266,8 @@ public class TorProxy {
             return this;
         }
 
-        public TorBuilder setExternalHiddenServicePort(int externalHiddenServicePort) {
-            this.externalHiddenServicePort = externalHiddenServicePort;
-            return this;
-        }
-
-        public TorBuilder setInternalHiddenServicePort(int internalHiddenServicePort) {
-            this.internalHiddenServicePort = internalHiddenServicePort;
-            return this;
+        public List<HiddenService> getServices() {
+            return services;
         }
 
         public TorBuilder setUseBrideges(boolean useBrideges) {
@@ -234,9 +285,8 @@ public class TorProxy {
             return this;
         }
 
-        public TorProxy build() {
-            return new TorProxy(this);
+        public TorProxy build(Context cntx) {
+            return new TorProxy(cntx, this);
         }
-
     }
 }
