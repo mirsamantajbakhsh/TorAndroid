@@ -32,9 +32,8 @@ public class TorProxy {
     public enum TorStatus {NOT_INIT, OK, CONNECTING, DIED, FAILED_INSTLLATION, INSTALLED, TORRC_NOT_FOUND}
 
     public static int SOCKS_PORT = 9050;
-    private int externalHiddenServicePort = -1;
-    private int internalHiddenServicePort = -1;
     private boolean useBrideges = false;
+    private String extraLines = "";
     private TorBuilder builder;
     private List<HiddenService> services = null;
 
@@ -55,6 +54,7 @@ public class TorProxy {
             this.services = builder.getServices();
             this.useBrideges = builder.useBrideges;
             this.debuggable = builder.debuggable;
+            this.extraLines = builder.extraLines;
         }
     }
 
@@ -75,6 +75,7 @@ public class TorProxy {
             this.services = builder.getServices();
             this.useBrideges = builder.useBrideges;
             this.debuggable = builder.debuggable;
+            this.extraLines = builder.extraLines;
         }
     }
 
@@ -211,6 +212,12 @@ public class TorProxy {
 
         if (useBrideges) {
             command.add("UseBridges 1"); //User may pass bridges as extra lines!
+        }
+
+        if (!extraLines.equalsIgnoreCase("")) {
+            for (String line : extraLines.split("\r\n")) {
+                command.add(line);
+            }
         }
 
 
