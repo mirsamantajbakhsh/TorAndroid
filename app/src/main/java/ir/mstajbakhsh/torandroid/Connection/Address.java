@@ -156,4 +156,9 @@ public class Address {
     public AddressHelper.AddressType getType() {
         return AddressHelper.getType(getHost());
     }
+
+    @Override
+    public String toString() {
+        return getHost() + ":" + getPort();
+    }
 }
