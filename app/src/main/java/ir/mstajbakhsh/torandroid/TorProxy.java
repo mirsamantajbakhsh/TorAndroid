@@ -343,7 +343,7 @@ public class TorProxy {
 
     public static class TorBuilder {
         private int SOCKS_PORT = -1;
-        List<HiddenService> services = new ArrayList<>();
+        private List<HiddenService> services;
         private String extraLines = "";
         private boolean useBrideges = false;
         private boolean debuggable = false;
@@ -358,6 +358,11 @@ public class TorProxy {
 
         public List<HiddenService> getServices() {
             return services;
+        }
+
+        public TorBuilder setServices(List<HiddenService> listOfServices) {
+            services = listOfServices;
+            return this;
         }
 
         public TorBuilder setUseBrideges(boolean useBrideges) {

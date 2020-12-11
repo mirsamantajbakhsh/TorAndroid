@@ -78,7 +78,7 @@ public class TorUtils {
             }
         }
 
-        builder.services = foundList;
+        builder.setServices(foundList);
         builder.setExtra(extraLines);
         return builder;
     }
