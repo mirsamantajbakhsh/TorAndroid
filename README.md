@@ -2,16 +2,23 @@
 
 # Tor Android
 
-Yet Another Tor Library for Android
+YATLA (**Y**et **A**nother **T**or **L**ibrary for **A**ndroid) Version 2 
 
-Tor Android is a library which included Tor binary inside it. Tor Binary is grabbed from [Guardian Project's maven](https://github.com/guardianproject/gpmaven/blob/master/org/torproject/tor-android-binary/). Some helper libraries added in order to make life easier.
+Tor Android is a library which included Tor binary inside it. Tor Binary is grabbed from [Guardian Project's maven](https://github.com/guardianproject/gpmaven/blob/master/org/torproject/tor-android-binary/). Some helper libraries added in order to make life easier. In the current version, 2 main features added including support for multiple hidden services, and ability to load former torrc file.
+
+
+
+## Changelog
+
+* Added Support for multiple Hidden Services
+* Able to create a new torrc or load existed one
 
 ## How To Import
 
 It is very simple. Just implement the following package in your application Gradle file:
 
 ```shell
-implementation 'ir.mstajbakhsh:tor-android:1.0.0'
+implementation 'ir.mstajbakhsh:tor-android:2.0.0'
 
 # Or Use JitPack
 
@@ -23,7 +30,7 @@ allprojects {
 	}
 
 dependencies {
-	        implementation 'com.github.mirsamantajbakhsh:TorAndroid:1.0.0'
+	        implementation 'com.github.mirsamantajbakhsh:TorAndroid:2.0.0'
 	}
 ```
 
