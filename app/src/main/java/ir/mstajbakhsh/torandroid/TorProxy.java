@@ -223,6 +223,8 @@ public class TorProxy {
                             }
                             if (line.contains(SampleTorServiceConstants.TOR_CONTROL_PORT_MSG_BOOTSTRAP_DONE)) {
                                 ts = TorStatus.OK;
+                                //Fill Hidden Service Addresses
+                                getOnionAddresses();
                                 connectionDone.onSuccess();
                                 return;
                             }
@@ -249,6 +251,55 @@ public class TorProxy {
                 Log.e("MSTTOR", e.getMessage());
             }
         }
+    }
+
+    public String[] getOnionAddresses() {
+        List<String> hsAddresses = new ArrayList<>();
+
+        if (ts != TorStatus.OK) {
+            if (debuggable) {
+                Log.e("MSTTOR", "Tor is not OK. Run it first or check other errors");
+            }
+            return new String[]{"Tor status is no OK."};
+        }
+
+        File hiddenServicesFolder = cntx.getDir("HiddenService", Context.MODE_PRIVATE);
+        File hostname;
+
+        for (File hsDir : TorUtils.getFolders(hiddenServicesFolder)) {
+
+            HiddenService hs = TorUtils.getHSFromFolder(services, hsDir);
+
+            hostname = new File(hsDir, "hostname");
+
+            if (!hostname.exists()) {
+                if (debuggable) {
+                    Log.e("MSTTOR", "HiddenService [" + hsDir.getAbsolutePath() + "] did not created. Check for errors.");
+                }
+            } else {
+                try {
+                    FileInputStream fis = new FileInputStream(hostname);
+                    byte[] data = new byte[(int) hostname.length()];
+                    fis.read(data);
+                    fis.close();
+
+                    String hiddenName = new String(data, "UTF-8");
+
+                    hiddenName = hiddenName.replaceAll("\n", "");
+
+                    hsAddresses.add(hiddenName);
+                    hs.setHiddenAddress(hiddenName);
+                } catch (Exception ex) {
+                    if (debuggable) {
+                        Log.e("MSTTOR", "Error in reading file [" + hostname.getAbsolutePath() + "].\r\n" + ex.getMessage());
+                    }
+                }
+            }
+        }
+
+        String[] result = new String[hsAddresses.size()];
+        result = hsAddresses.toArray(result);
+        return result;
     }
 
     public static class TorBuilder {
