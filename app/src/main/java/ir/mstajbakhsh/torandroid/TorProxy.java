@@ -209,6 +209,10 @@ public class TorProxy {
             command.add(hs.toString());
         }
 
+        if (useBrideges) {
+            command.add("UseBridges 1"); //User may pass bridges as extra lines!
+        }
+
 
         //Folder is too permissive
         try {
