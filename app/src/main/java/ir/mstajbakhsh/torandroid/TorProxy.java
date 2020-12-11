@@ -302,6 +302,10 @@ public class TorProxy {
         return result;
     }
 
+    public List<HiddenService> getHiddenServices() {
+        return services;
+    }
+
     public static class TorBuilder {
         private int SOCKS_PORT = -1;
         List<HiddenService> services = new ArrayList<>();
