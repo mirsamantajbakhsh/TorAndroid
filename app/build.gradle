@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "2.0.0446"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -23,7 +23,7 @@ android {
 
 dependencies {
     embed fileTree(dir: "libs", include: ["*.jar", "*.aar"])
-    embed(name: 'tor-android-binary-0.4.4.0', ext: 'aar')
+    embed(name: 'tor-android-binary-0.4.4.6', ext: 'aar')
     embed 'org.slf4j:slf4j-api:1.7.24'
     embed 'org.slf4j:slf4j-simple:1.7.24'
     embed group: 'org.zeroturnaround', name: 'zt-exec', version: '1.12'

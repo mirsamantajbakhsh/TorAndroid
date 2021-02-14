@@ -10,15 +10,14 @@ Tor Android is a library which included Tor binary inside it. Tor Binary is grab
 
 ## Changelog
 
-* Added Support for multiple Hidden Services
-* Able to create a new torrc or load existed one
+* Update to TOR version 0.4.4.6
 
 ## How To Import
 
 It is very simple. Just implement the following package in your application Gradle file:
 
 ```shell
-implementation 'ir.mstajbakhsh:tor-android:2.0.0'
+implementation 'ir.mstajbakhsh:tor-android:2.0.0446'
 
 # Or Use JitPack
 
@@ -30,7 +29,7 @@ allprojects {
 	}
 
 dependencies {
-	        implementation 'com.github.mirsamantajbakhsh:TorAndroid:2.0.0'
+	        implementation 'com.github.mirsamantajbakhsh:TorAndroid:2.0.0446'
 	}
 ```
 
