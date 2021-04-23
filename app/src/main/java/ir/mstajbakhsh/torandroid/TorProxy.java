@@ -190,24 +190,26 @@ public class TorProxy {
         command.add("DataDirectory " + appCacheHome.getCanonicalPath());
         command.add("SocksPort " + SOCKS_PORT);
 
-        for (HiddenService hs : services) {
-            if (hs.getHiddenServiceDir().equalsIgnoreCase("")) { //Create HSDir if not created!
-                File newHSDir;
+        if (services != null) {
+            for (HiddenService hs : services) {
+                if (hs.getHiddenServiceDir().equalsIgnoreCase("")) { //Create HSDir if not created!
+                    File newHSDir;
 
-                int availableHSFolderNumber = 1;
-                while (true) {
-                    newHSDir = new File(HSDir.getAbsolutePath() + File.separator + "HS" + availableHSFolderNumber);
-                    if (!newHSDir.exists()) {
-                        newHSDir.mkdirs();
-                        break;
+                    int availableHSFolderNumber = 1;
+                    while (true) {
+                        newHSDir = new File(HSDir.getAbsolutePath() + File.separator + "HS" + availableHSFolderNumber);
+                        if (!newHSDir.exists()) {
+                            newHSDir.mkdirs();
+                            break;
+                        }
+                        availableHSFolderNumber++;
                     }
-                    availableHSFolderNumber++;
+
+                    hs.setHiddenServiceDir(newHSDir.getAbsolutePath());
                 }
 
-                hs.setHiddenServiceDir(newHSDir.getAbsolutePath());
+                command.add(hs.toString());
             }
-
-            command.add(hs.toString());
         }
 
         if (useBrideges) {
@@ -227,8 +229,10 @@ public class TorProxy {
             new ProcessExecutor("chmod", "700", HSDir.getCanonicalPath()).execute();
 
             //Make each HS folder 700
-            for (HiddenService hsDir : services) {
-                new ProcessExecutor("chmod", "700", hsDir.getHiddenServiceDir()).execute();
+            if (services != null) {
+                for (HiddenService hsDir : services) {
+                    new ProcessExecutor("chmod", "700", hsDir.getHiddenServiceDir()).execute();
+                }
             }
 
         } catch (InterruptedException | TimeoutException e) {
