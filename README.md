@@ -10,14 +10,15 @@ Tor Android is a library which included Tor binary inside it. Tor Binary is grab
 
 ## Changelog
 
-* Update to TOR version 0.4.4.6
+* Bug fixed #4 : Now the library works when there is no hidden service available.
+* Connect Mode added to README.
 
 ## How To Import
 
 It is very simple. Just implement the following package in your application Gradle file:
 
 ```shell
-implementation 'ir.mstajbakhsh:tor-android:2.0.0446'
+implementation 'ir.mstajbakhsh:tor-android:2.0.0447'
 
 # Or Use JitPack
 
@@ -29,7 +30,7 @@ allprojects {
 	}
 
 dependencies {
-	        implementation 'com.github.mirsamantajbakhsh:TorAndroid:2.0.0446'
+	        implementation 'com.github.mirsamantajbakhsh:TorAndroid:2.0.0447'
 	}
 ```
 
@@ -125,6 +126,44 @@ tp.init();
 ```
 
 In this case, the previously configured torrc file (located in **torconfig** directory of private app storage), will be loaded.
+
+### Connect Mode
+
+In this mode, you can only start Tor in order to connect to normal/hidden services. It will open a SOCKS5 port available in the application. All the connections in your application can be proxied through the SOCKS5 proxy. Here is the code example:
+
+```java
+public void startTorInBackground(Context cntx) {
+        HandlerThread mHandlerThread = new HandlerThread("TorThread");
+        mHandlerThread.start();
+        Handler mHandler = new Handler(mHandlerThread.getLooper());
+        mHandler.postDelayed(() -> {
+            final TorProxy tb = new TorProxy.TorBuilder()
+                    .setSOCKsPort(9150)
+                    .setUseBrideges(false)
+                    .setDebuggable(false)
+                    .build(cntx.getApplicationContext());
+            tb.init();
+            try {
+                final IConnectionDone icd = new IConnectionDone() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d("TorAndroid", "Tor Started Successfully.");
+                    }
+
+                    @Override
+                    public void onFailure(Exception ex) {
+                        Log.e("TorAndroid", "Error in Starting Tor.\r\n" + ex.getMessage());
+                    }
+                };
+                tb.start(icd);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }, 1000);
+    }
+```
+
+
 
 # Donate
 
