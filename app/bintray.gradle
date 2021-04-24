@@ -1,6 +1,6 @@
 apply plugin: 'com.jfrog.bintray'
 
-version = '2.0.0446'
+version = '2.0.0447'
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
@@ -30,6 +30,7 @@ bintray {
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.apikey")
 
+    override = true
     pkg {
         repo = 'Android'
         name = 'TorAndroid'
